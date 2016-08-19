@@ -123,7 +123,6 @@ int BIG_diszilch(DBIG a)
 }
 
 /* SU= 56 */
-/* output a */
 void BIG_output(BIG a)
 {
     BIG b;
@@ -137,43 +136,61 @@ void BIG_output(BIG a)
     }
     if (len<MODBYTES*2) len=MODBYTES*2;
 
+    char buf[((2 * len) + 1)];
+    char *out = buf;
+    int strlen = 0;
+
     for (i=len-1; i>=0; i--)
     {
         BIG_copy(b,a);
         BIG_shr(b,i*4);
-        printf("%01x",(unsigned int) b[0]&15);
+        strlen += sprintf(out + strlen, "%01x", (unsigned int) b[0]&15);
     }
+
+    printf("%s", out);
 }
 
 /* SU= 16 */
 void BIG_rawoutput(BIG a)
 {
+    char buf[((21 * NLEN) + 3)];
+    char *out = buf;
+    int strlen = 0;
     int i;
-    printf("(");
-    for (i=0; i<NLEN-1; i++)
+    strlen += sprintf(out, "(");
+    for (i=0; i<NLEN; i++)
+    {
 #if CHUNK==64
-        printf("%"PRId64",",(uint64_t) a[i]);
-    printf("%"PRId64")",(uint64_t) a[NLEN-1]);
+        strlen += sprintf(out + strlen, "%"PRId64",", (uint64_t) a[i]);
 #else
-        printf("%x,",(unsigned int) a[i]);
-    printf("%x)",(unsigned int) a[NLEN-1]);
+        strlen += sprintf(out + strlen, "%x,", (unsigned int) a[i]);
 #endif
+    }
+    sprintf(out + (strlen - 1), ")");
+    printf("%s", out);
 }
+
 /*
 void BIG_rawdoutput(DBIG a)
 {
-	int i;
-	printf("(");
-	for (i=0;i<DNLEN-1;i++)
+    char buf[((21 * DNLEN) + 3)];
+    char *out = buf;
+    int strlen = 0;
+    int i;
+    strlen += sprintf(out, "(");
+    for (i=0;i<DNLEN;i++)
+    {
 #if CHUNK==64
-	  printf("%llx,",(long long unsigned int) a[i]);
-	printf("%llx)",(long long unsigned int) a[DNLEN-1]);
+        printf("%llx,",(long long unsigned int) a[i]);
 #else
-	  printf("%x,",(unsigned int) a[i]);
-	printf("%x)",(unsigned int) a[NLEN-1]);
+        printf("%x,",(unsigned int) a[i]);
 #endif
+    }
+    sprintf(out + (strlen - 1), ")");
+    printf("%s", out);
 }
 */
+
 /* Swap a and b if d=1 */
 void BIG_cswap(BIG a,BIG b,int d)
 {
@@ -254,7 +271,6 @@ void BIG_fromBytesLen(BIG a,char *b,int s)
 #endif
 }
 
-
 /* SU= 88 */
 void BIG_doutput(DBIG a)
 {
@@ -269,12 +285,18 @@ void BIG_doutput(DBIG a)
         len++;
     }
 
+    char buf[((2 * len) + 1)];
+    char *out = buf;
+    int strlen = 0;
+
     for (i=len-1; i>=0; i--)
     {
         BIG_dcopy(b,a);
         BIG_dshr(b,i*4);
-        printf("%01x",(unsigned int) b[0]&15);
+        strlen += sprintf(out + strlen, "%01x", (unsigned int) b[0]&15);
     }
+
+    printf("%s", out);
 }
 
 /* Copy b=a */
@@ -1424,4 +1446,3 @@ void BIG_mod2m(BIG x,int m)
     x[wd]&=msk;
     for (i=wd+1; i<NLEN; i++) x[i]=0;
 }
-
